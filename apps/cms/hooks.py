@@ -7,9 +7,9 @@ from .models import CMSUser
 
 
 @bp.before_request
-def before_request():
+def before_request():  # 钩子函数，通过全局变量g，可以向前端传递用户信息
     if config.CMS_USER_ID in session:
-        user_id = session.get(config.CMS_USER_ID)
+        user_id = session.get(config.CMS_USER_ID)  # 获取用户id
         user = CMSUser.query.get(user_id)
         if user:
             g.cms_user = user
