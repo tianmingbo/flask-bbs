@@ -2,7 +2,7 @@
  * Created by Administrator on 2016/12/14.
  */
 
-var xtalert = {
+var mbalert = {
     /*
         功能：提示错误
         参数：

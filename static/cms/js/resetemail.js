@@ -3,7 +3,7 @@ $(function () {
         event.preventDefault();
         var email = $("input[name='email']").val();
         if(!email){
-            xtalert.alertInfoToast('请输入邮箱');
+            mbalert.alertInfoToast('请输入邮箱');
             return;
         }
         zlajax.get({
@@ -13,13 +13,13 @@ $(function () {
             },
             'success': function (data) {
                 if(data['code'] == 200){
-                    xtalert.alertSuccessToast('邮件发送成功！请注意查收！');
+                    mbalert.alertSuccessToast('邮件发送成功！请注意查收！');
                 }else{
-                    xtalert.alertInfo(data['message']);
+                    mbalert.alertInfo(data['message']);
                 }
             },
             'fail': function (error) {
-                xtalert.alertNetworkError();
+                mbalert.alertNetworkError();
             }
         });
     });
@@ -44,13 +44,13 @@ $(function () {
                 if(data['code'] == 200){
                     emailE.val("");
                     captchaE.val("");
-                    xtalert.alertSuccessToast('恭喜！邮箱修改成功！');
+                    mbalert.alertSuccessToast('恭喜！邮箱修改成功！');
                 }else{
-                    xtalert.alertInfo(data['message']);
+                    mbalert.alertInfo(data['message']);
                 }
             },
             'fail': function (error) {
-                xtalert.alertNetworkError();
+                mbalert.alertNetworkError();
             }
         });
     });

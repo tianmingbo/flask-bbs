@@ -15,11 +15,12 @@ import uuid
 from exts import db, mail
 from flask_mail import Message
 import config
-from .models import CMSUser
-from .forms import LoginForm, ResetpwdForm, ResetEmailForm
-from .dectrators import login_requires
+from .models import CMSUser, CMSPersmission
+from .forms import LoginForm, ResetpwdForm, ResetEmailForm, AddBannerForm, UpdateBannerForm
+from .dectrators import login_requires, primission_require
 from utils import restful
 from utils import mbcache
+from apps.models import BannerModel
 
 bp = Blueprint('cms', __name__, url_prefix='/cms')
 
@@ -28,6 +29,70 @@ bp = Blueprint('cms', __name__, url_prefix='/cms')
 @login_requires
 def index():
     return render_template('cms/cms_index.html')
+
+
+@bp.route('/banners/')
+@login_requires
+def banners():
+    banners = BannerModel.query.order_by(BannerModel.priority.desc()).all()
+    return render_template('cms/cms_baners.html', banners=banners)
+
+
+@bp.route('/add_banners/', methods=['POST'])
+@login_requires
+def add_banners():
+    form = AddBannerForm(request.form)
+    if form.validate():
+        name = form.name.data
+        image_url = form.image_url.data
+        link_url = form.link_url.data
+        priority = form.priority.data
+        banner = BannerModel(name=name, image_url=image_url, link_url=link_url, priority=priority)
+        db.session.add(banner)
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.params_error(message=form.get_error())
+
+
+@bp.route('/update_banner/', methods=['POST'])
+@login_requires
+def update_banner():
+    form = UpdateBannerForm(request.form)
+    if form.validate():
+        name = form.name.data
+        image_url = form.image_url.data
+        link_url = form.link_url.data
+        priority = form.priority.data
+        banner_id = form.banner_id.data
+        print(banner_id)
+        banner = BannerModel.query.filter_by(id=banner_id).first()
+        print(banner)
+        if banner:
+            banner.name = name
+            banner.image_url = image_url
+            banner.link_url = link_url
+            banner.priority = priority
+            db.session.commit()
+            return restful.success()
+        else:
+            return restful.params_error(message='没有这个轮播图')
+    else:
+        return restful.params_error(message=form.get_error())
+
+
+@bp.route('/delete_banner/', methods=['POST'])
+@login_requires
+def delete_banner():
+    banner_id = request.form.get('banner_id')
+    if not banner_id:
+        return restful.params_error(message='没有轮播图id！')  # 甚是不妥
+    banner = BannerModel.query.get(banner_id)
+    if not banner:
+        return restful.params_error(message='没有这个轮播图！')
+    db.session.delete(banner)
+    db.session.commit()
+    return restful.success()  # 返回成功提示
 
 
 @bp.route('/logout/')
@@ -41,6 +106,48 @@ def logout():
 @login_requires
 def profile():
     return render_template('cms/cms_profile.html')  # 个人信息页面
+
+
+@bp.route('/posts/')
+@login_requires
+@primission_require(CMSPersmission.POSTER)
+def posts():
+    return render_template('cms/cms_posts.html')
+
+
+@bp.route('/comments/')
+@login_requires
+@primission_require(CMSPersmission.COMMENTER)
+def comments():
+    return render_template('cms/cms_comments.html')
+
+
+@bp.route('/boards/')
+@login_requires
+@primission_require(CMSPersmission.BOARDER)
+def boards():
+    return render_template('cms/cms_boards.html')
+
+
+@bp.route('/fusers/')
+@login_requires
+@primission_require(CMSPersmission.FRONTUSER)
+def fusers():
+    return render_template('cms/cms_fusers.html')
+
+
+@bp.route('/cusers/')
+@login_requires
+@primission_require(CMSPersmission.CMSUSER)
+def cusers():
+    return render_template('cms/cms_cusers.html')
+
+
+@bp.route('/croles/')
+@login_requires
+@primission_require(CMSPersmission.ALL_PERMISSION)
+def croles():
+    return render_template('cms/cms_croles.html')
 
 
 class CmsLoginView(views.MethodView):

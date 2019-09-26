@@ -2,7 +2,8 @@ __author__ = '田明博'
 __date__ = '2019/9/18 17:54'
 import os
 
-SECRET_KEY = os.urandom(24)  # post提交需要设置SECRET_KEY
+# SECRET_KEY = os.urandom(24)  # post提交需要设置SECRET_KEY
+SECRET_KEY = 'ccjaskgvksjvk'  # post提交需要设置SECRET_KEY
 
 DEBUG = True
 
@@ -19,6 +20,7 @@ SQLALCHEMY_DATABASE_URI = DB_URI
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 CMS_USER_ID = 'DEFAULT'
+FRONT_USER_ID = '666sadf'
 
 # 邮箱配置
 # MAIL_USE_TLS：端口号587
@@ -32,3 +34,7 @@ MAIL_USE_TLS = True
 MAIL_USERNAME = "1414518976@qq.com"
 MAIL_PASSWORD = "gqtjsezolmmzhced"  # 生成授权码
 MAIL_DEFAULT_SENDER = "1414518976@qq.com"
+
+# 发送短信验证码配置
+KEY = "LTAI0MNcf8X6BuhW"
+SECRET = "qFI9SDlGBfMKlYEIfJSMubJVx2KkDG"

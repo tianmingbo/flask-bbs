@@ -3,7 +3,7 @@ from flask import g
 from wtforms import StringField, IntegerField
 from wtforms.validators import Email, InputRequired, Length, EqualTo
 from wtforms import ValidationError
-from apps.front.forms import BaseForm
+from ..forms import BaseForm
 from utils import mbcache
 
 
@@ -35,3 +35,14 @@ class ResetEmailForm(BaseForm):
         captcha_cache = mbcache.get(email)  # 从memcach中获取验证码
         if not captcha_cache or captcha.lower() != captcha_cache.lower():  # 不区分大小写
             return ValidationError('验证码错误')
+
+
+class AddBannerForm(BaseForm):
+    name = StringField(validators=[InputRequired(message='请输入轮播图名称！')])
+    image_url = StringField(validators=[InputRequired(message='请输入轮播图图片链接！')])
+    link_url = StringField(validators=[InputRequired(message='请输入轮播图跳转链接！')])
+    priority = IntegerField(validators=[InputRequired(message='请输入轮播图优先级！')])  # 优先级整型
+
+class UpdateBannerForm(AddBannerForm):
+    banner_id=IntegerField(validators=[InputRequired(message='请输入轮播图的id！')])
+

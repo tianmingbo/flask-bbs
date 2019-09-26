@@ -24,17 +24,17 @@ $(function () {
             'success': function (data) {
                 //通过回调信息，弹出提示框
                 if (data['code'] == 200) {
-                    xtalert.alertSuccessToast("恭喜！密码修改成功！");
+                    mbalert.alertSuccessToast("恭喜！密码修改成功！");
                     oldpwdE.val("");   //清空输入框
                     newpwdE.val("");
                     newpwd2E.val("");
                 } else {
                     var message = data['message'];
-                    xtalert.alertInfo(message);
+                    mbalert.alertInfo(message);
                 }
             },
             'fail': function (error) {
-                xtalert.alertNetworkError();
+                mbalert.alertNetworkError();
             }
         });
     });

@@ -5,12 +5,16 @@ from flask_migrate import Migrate, MigrateCommand
 
 from exts import db
 from apps.cms import models as cms_models
+from apps.front import models as front_models
+from apps.models import BannerModel
 from bbs import create_app
 
 app = create_app()
 CMSUser = cms_models.CMSUser
 CMSRole = cms_models.CMSRole
 CMSPermission = cms_models.CMSPersmission
+
+FrontUser = front_models.FrontUser
 
 manager = Manager(app)
 # 用来绑定app和db到flask_migrate
@@ -71,6 +75,15 @@ def add_user_to_role(email, name):  # 为用户添加权限
             print('没有这个角色：%s' % role)
     else:
         print('%s邮箱没有这个用户!' % email)
+
+
+@manager.option('-t', '--telephone', dest='telephone')
+@manager.option('-u', '--username', dest='username')
+@manager.option('-p', '--password', dest='password')
+def create_front_user(telephone, username, password):
+    user = FrontUser(telephone=telephone, username=username, password=password)
+    db.session.add(user)  # 添加
+    db.session.commit()
 
 
 @manager.command
