@@ -6,7 +6,7 @@ from flask_migrate import Migrate, MigrateCommand
 from exts import db
 from apps.cms import models as cms_models
 from apps.front import models as front_models
-from apps.models import BannerModel
+from apps.models import BannerModel, BoardModel, PostModel
 from bbs import create_app
 
 app = create_app()
@@ -93,6 +93,21 @@ def test_permission():
         print('这个用户有开发者的权限！')
     else:
         print('这个用户没有开发者权限！')
+
+
+@manager.command
+def create_test_post():
+    for x in range(1, 205):
+        title = '标题%s' % x
+        content = '内容：%s' % x
+        board = BoardModel.query.first()
+        author = FrontUser.query.first()
+        post = PostModel(title=title, content=content)
+        post.board = board
+        post.author = author
+        db.session.add(post)
+        db.session.commit()
+    print('恭喜！测试帖子添加成功！')
 
 
 if __name__ == '__main__':

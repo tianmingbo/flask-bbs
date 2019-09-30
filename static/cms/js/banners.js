@@ -109,12 +109,12 @@ $(function () {
 
 $(function () {
     zlqiniu.setUp({
-        'domain': 'http://7xqenu.com1.z0.glb.clouddn.com/',
+        'domain': 'http://pyfmq94x8.bkt.clouddn.com/up-z2.qiniup.com/',
         'browse_btn': 'upload-btn',
         'uptoken_url': '/c/uptoken/',
         'success': function (up, file, info) {
             var imageInput = $("input[name='image_url']");
-            imageInput.val(file.name);
+            imageInput.val(file.name);//放到输入框
         }
     });
 });

@@ -1,8 +1,8 @@
 __author__ = '田明博'
 __date__ = '2019/9/18 17:58'
 
-from wtforms import StringField, ValidationError
-from wtforms.validators import Regexp, Length, EqualTo
+from wtforms import StringField, ValidationError, IntegerField
+from wtforms.validators import Regexp, Length, EqualTo, InputRequired
 from ..forms import BaseForm
 from utils import mbcache
 
@@ -31,7 +31,14 @@ class RegisterForm(BaseForm):
             if not sms_captcha_mem or sms_captcha.lower() != sms_captcha_mem.lower():
                 raise ValidationError(message="短信验证码错误")
 
+
 class LoginForm(BaseForm):
     telephone = StringField(validators=[Regexp(r'1[3456789]\d{9}')])
     password = StringField(validators=[Length(6, 20, message='请输入正确格式的密码')])
-    remember=StringField()
+    remember = StringField()
+
+
+class AddPostFrom(BaseForm):
+    title = StringField(validators=[InputRequired(message='请输入标题！')])
+    content = StringField(validators=[InputRequired(message='请输入内容！')])
+    board_id = IntegerField(validators=[InputRequired(message='请输入id！')])

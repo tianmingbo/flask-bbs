@@ -13,5 +13,7 @@ __date__ = '2019/9/21 21:37'
 # print(captcha)
 # import shortuuid
 # print(shortuuid.uuid())
-
-
+import config
+from flask import session,g
+session[config.FRONT_USER_ID]='dddd'
+print(session)

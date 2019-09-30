@@ -1,7 +1,8 @@
 __author__ = '田明博'
 __date__ = '2019/9/18 17:56'
 
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request, make_response, jsonify
+import qiniu
 from utils.captcha import Captcha
 from utils import mbcache, alidayu
 from utils import restful, mbcache
@@ -62,3 +63,14 @@ def sms_captcha():
             return restful.success()
     else:
         return restful.params_error(message='参数错误')
+
+
+@bp.route('/uptoken/')  # 使用七牛存储
+def uptoken():
+    access_key = 'VspB8nq2G1hscVwHWSUp8Jkwx9FBgZ-KkYbdwHce'
+    secret_key = 'bJlAhvT6dJF-lvolwDK84b5q3q3wLbaSO-IRGTYI'
+    q = qiniu.Auth(access_key, secret_key)
+
+    bucket = 'flasksbbs'
+    token = q.upload_token(bucket)
+    return jsonify({'uptoken': token})

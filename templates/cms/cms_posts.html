@@ -1,15 +1,50 @@
 {% extends 'cms/cms_base.html' %}
-
+{% from 'common/_macros.html' import static %}
 {% block title %}帖子管理{% endblock %}
 
 {% block head %}
-
+    <script src="{{ static('cms/js/post.js')}}"></script>
 {% endblock %}
 
 {% block page_title %}
     {{ self.title() }}
 {% endblock %}
 
-{% block main_content %}
-    我是帖子管理页面
+{% block content %}
+
+    <table class="table-bordered table">
+        <thead>
+        <tr>
+            <th>帖子名称</th>
+            <th>创建时间</th>
+            <th>帖子板块</th>
+            <th>作者</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for post in posts %}
+            <tr data-title="{{ post.title }}" data-id="{{ post.id }}" data-highlight="{{ 1 if post.highlight else 0 }}">
+                <td>{{ post.title }}</td>
+                <td>{{ post.create_time }}</td>
+                <td>{{ post.board.name }}</td>
+                <td>{{ post.author.username }}</td>
+                <td>
+                    {% if post.highlight %}
+                        <button class="btn btn-default btn-xs edit-post-btn">取消加精</button>
+                    {% else %}
+                        <button class="btn btn-default btn-xs edit-post-btn">加精</button>
+                    {% endif %}
+                    <button class="btn btn-danger btn-xs delete-post-btn">删除</button>
+                </td>
+            </tr>
+        {% endfor %}
+
+
+        </tbody>
+    </table>
+    <div style="text-align:center;">
+        {{ pagination.links }}
+        {# 分页#}
+    </div>
 {% endblock %}

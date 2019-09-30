@@ -17,7 +17,7 @@ def send_sms(telephone, captcha):
     request.set_action_name('SendSms')
 
     request.add_query_param('RegionId', "cn-hangzhou")
-    # request.add_query_param('PhoneNumbers', telephone)
+    request.add_query_param('PhoneNumbers', telephone)
     request.add_query_param('SignName', "flask论坛")
     request.add_query_param('TemplateCode', "SMS_174806057")
     code = {}

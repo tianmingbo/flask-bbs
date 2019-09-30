@@ -43,6 +43,11 @@ class AddBannerForm(BaseForm):
     link_url = StringField(validators=[InputRequired(message='请输入轮播图跳转链接！')])
     priority = IntegerField(validators=[InputRequired(message='请输入轮播图优先级！')])  # 优先级整型
 
-class UpdateBannerForm(AddBannerForm):
-    banner_id=IntegerField(validators=[InputRequired(message='请输入轮播图的id！')])
 
+class UpdateBannerForm(AddBannerForm):
+    banner_id = IntegerField(validators=[InputRequired(message='请输入轮播图的id！')])
+
+
+class UpdateBoardForm(BaseForm):
+    board_id = IntegerField(validators=[InputRequired(message='请输入板块的id！')])
+    name = StringField(validators=[InputRequired(message='请输入板块名称！')])

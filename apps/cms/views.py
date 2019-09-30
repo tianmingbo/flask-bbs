@@ -11,16 +11,26 @@ from flask import (
     g,
     jsonify,
 )
+from flask_paginate import Pagination, get_page_parameter
+
 import uuid
 from exts import db, mail
 from flask_mail import Message
 import config
 from .models import CMSUser, CMSPersmission
-from .forms import LoginForm, ResetpwdForm, ResetEmailForm, AddBannerForm, UpdateBannerForm
+from .forms import (
+    LoginForm,
+    ResetpwdForm,
+    ResetEmailForm,
+    AddBannerForm,
+    UpdateBannerForm,
+    UpdateBoardForm,
+)
 from .dectrators import login_requires, primission_require
 from utils import restful
 from utils import mbcache
-from apps.models import BannerModel
+from apps.models import BannerModel, BoardModel, PostModel, HighLightPostModel
+from tasks import send_mail
 
 bp = Blueprint('cms', __name__, url_prefix='/cms')
 
@@ -34,8 +44,8 @@ def index():
 @bp.route('/banners/')
 @login_requires
 def banners():
-    banners = BannerModel.query.order_by(BannerModel.priority.desc()).all()
-    return render_template('cms/cms_baners.html', banners=banners)
+    banners_list = BannerModel.query.order_by(BannerModel.priority.desc()).all()
+    return render_template('cms/cms_baners.html', banners=banners_list)
 
 
 @bp.route('/add_banners/', methods=['POST'])
@@ -112,7 +122,17 @@ def profile():
 @login_requires
 @primission_require(CMSPersmission.POSTER)
 def posts():
-    return render_template('cms/cms_posts.html')
+    page = request.args.get(get_page_parameter(), type=int, default=1)  # 没有page参数，默认值为1
+    start = (page - 1) * config.PER_PAGE  # 起始位置
+    end = start + config.PER_PAGE
+    post_list = PostModel.query.slice(start, end)
+    pagination = Pagination(bs_version=3, page=page, total=PostModel.query.count(), outer_window=0, inner_window=2)
+
+    context = {
+        'posts': post_list,
+        'pagination': pagination
+    }
+    return render_template('cms/cms_posts.html', **context)
 
 
 @bp.route('/comments/')
@@ -126,7 +146,84 @@ def comments():
 @login_requires
 @primission_require(CMSPersmission.BOARDER)
 def boards():
-    return render_template('cms/cms_boards.html')
+    board_list = BoardModel.query.all()
+    return render_template('cms/cms_boards.html', boards=board_list)
+
+
+@bp.route('/add_board/', methods=['POST'])
+@login_requires
+def add_board():
+    name = request.form.get('name')
+    if not name:
+        return restful.params_error(message='没有模块名称！')
+    board_obj = BoardModel(name=name)
+    db.session.add(board_obj)
+    db.session.commit()
+    return restful.success()
+
+
+@bp.route('/update_board/', methods=['POST'])
+@login_requires
+def update_board():
+    form = UpdateBoardForm(request.form)
+    if form.validate():
+        board_id = form.board_id.data
+        name = form.name.data
+        board_obj = BoardModel.query.get(board_id)
+        if not board_obj:
+            return restful.params_error(message='没有这个板块！')
+        board_obj.name = name
+        db.session.commit()
+        return restful.success()
+    return restful.params_error(message='错误！')
+
+
+@bp.route('/delete_board/', methods=['POST'])
+@login_requires
+def delete_board():
+    board_id = request.form.get('board_id')
+    if not board_id:
+        return restful.params_error(message='没有板块id！')
+    board = BoardModel.query.get(board_id)
+    if not board:
+        return restful.params_error(message='没有这个板块！')
+    db.session.delete(board)
+    db.session.commit()
+    return restful.success()  # 返回成功提示
+
+
+@bp.route('/add_highlight/', methods=['POST'])
+@login_requires
+def add_highlight():
+    post_id = request.form.get('post_id')
+    if not post_id:
+        return restful.params_error(message='请传入帖子id')
+    post_obj = PostModel.query.filter_by(id=post_id).first()
+    if not post_obj:
+        return restful.params_error(message='没有这篇帖子')
+    highlight_obj = HighLightPostModel()  # 新建一个对象
+    highlight_obj.post = post_obj
+    db.session.add(highlight_obj)
+    db.session.commit()
+
+    return restful.success()
+
+
+@bp.route('/remove_highlight/', methods=['POST'])
+@login_requires
+def remove_highlight():
+    post_id = request.form.get('post_id')
+    if not post_id:
+        return restful.params_error(message='请传入帖子id')
+    post_obj = PostModel.query.filter_by(id=post_id).first()
+    if not post_obj:
+        return restful.params_error(message='没有这篇帖子')
+    highlight_obj = HighLightPostModel.query.filter_by(id=post_id).first()  # 获取加精对象
+
+    db.session.delete(highlight_obj)  # 删除
+    db.session.commit()
+
+    return restful.success()
 
 
 @bp.route('/fusers/')
@@ -234,12 +331,13 @@ def email_captcha():
     # user.catptcha_code = captcha
     # db.session.commit()  # 把验证码保存到数据库/存放在memcached中
     # 给用户提交的邮箱发送邮件
-    message = Message('Python论坛邮箱验证码', recipients=[email], body='您的验证码是：%s' % captcha)
-
-    try:
-        mail.send(message)  # 发送
-    except:
-        return restful.server_error()
+    # message = Message('Python论坛邮箱验证码', recipients=[email], body='您的验证码是：%s' % captcha)
+    #
+    # try:
+    #     mail.send(message)  # 发送
+    # except:
+    #     return restful.server_error()
+    send_mail.delay('Python论坛邮箱验证码', [email], '您的验证码是：%s' % captcha)
     mbcache.set(email, captcha)
     return restful.success()
 

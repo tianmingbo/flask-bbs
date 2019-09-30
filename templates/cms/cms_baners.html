@@ -5,6 +5,10 @@
 {% endblock %}
 
 {% block head %}
+    <script src="https://cdn.staticfile.org/Plupload/2.1.1/moxie.js"></script>
+    <script src="https://cdn.staticfile.org/Plupload/2.1.1/plupload.dev.js"></script>
+    <script src="https://cdn.staticfile.org/qiniu-js-sdk/1.0.14-beta/qiniu.js"></script>
+    <script src="{{ static('common/zlqiniu.js') }}"></script>
     <script src="{{ static('cms/js/banners.js') }}"></script>
     <style>
         .top-box {
@@ -40,8 +44,8 @@
                 data-priority="{{ banner.priority }}" data-id="{{ banner.id }}">
                 {#绑定数据，便于编辑时，获取数据，填充到模态框中#}
                 <td>{{ banner.name }}</td>
-                <td>{{ banner.image_url }}</td>
-                <td>{{ banner.link_url }}</td>
+                <td><a href="{{ banner.image_url }}">{{ banner.image_url }}</a></td>
+                <td><a href="{{ banner.link_url }}">{{ banner.link_url }}</a></td>
                 <td>{{ banner.priority }}</td>
                 <td>{{ banner.create_time }}</td>
                 <td>
